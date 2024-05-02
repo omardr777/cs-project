@@ -31,6 +31,40 @@ struct Storage {
 	int columns;
 };
 
+
+void printLn(string message);
+void printDivider();
+void printThinDivider();
+void recordAction(string action);
+void loadHistory();
+void saveHistory();
+void displayHistory();
+void performActionSaveAndLoad(string action);
+string intToString(int num);
+int stringToInt(const string& str);
+void loadProducts(Product p[]);
+void loadStorages(Storage s[]);
+void loadData(Storage s[], Product p[]);
+void addStorage(Storage s[]);
+Storage searchStorage(Storage s[], int id);
+void saveStorages(Storage s[]);
+void removeStorage(Storage s[], int storageId);
+bool isValidRowColumn(Storage& storage, int row, int column);
+bool isRowColumnAvailable(Product p[], int sId, int row, int column);
+void display(Storage s, Product p[]);
+void displayStorages(Storage s[], Product p[]);
+Product searchProduct(Product p[], int id);
+void runStorage(Storage s[], Product p[]);
+void saveProducts(Product p[]);
+void display(Product& p);
+void displayProducts(Product p[]);
+void updateProduct(Product p[], Storage s[]);
+void addProduct(Product p[], Storage s[]);
+void removeProduct(Product p[], int productId);
+void runProduct(Product p[], Storage s[]);
+void run(Storage s[], Product p[]);
+void bubbleSortProducts(Product p[], int size);
+
 void printLn(string message){
 	cout << message << endl;
 }
@@ -237,9 +271,9 @@ bool isValidRowColumn(Storage& storage, int row, int column) {
     return (row >= 1 && row <= storage.rows && column >= 1 && column <= storage.columns);
 }
 
-bool isRowColumnAvailable(Product p[], int sId, int row, int column) {
+bool isRowColumnAvailable(Product p[], int sId, int row, int column,int id) {
     for (int i = 0; i < pSize; ++i) {
-        if (p[i].storageId == sId && p[i].row == row && p[i].column == column) {
+        if (p[i].storageId == sId && p[i].row == row && p[i].column == column && p[i].id != id) {
             return false;
         }
     }
@@ -410,7 +444,7 @@ void updateProduct(Product p[], Storage s[]) {
             return;
         }
 
-        if (!isRowColumnAvailable(p, sId, row, column)) {
+        if (!isRowColumnAvailable(p, sId, row, column,p[index].id)) {
             cout << "Row " << row << " and column " << column << " are already used by another product." << endl;
             return;
         }
@@ -458,7 +492,7 @@ void addProduct(Product p[],Storage s[]) {
     }
     
     
-    if (!isRowColumnAvailable(p,sId,row,column)) {
+    if (!isRowColumnAvailable(p,sId,row,column,pSize)) {
         cout << "Row " << row << " and column " << column << " are already used by another product." << endl;
         return;
     }
@@ -466,6 +500,18 @@ void addProduct(Product p[],Storage s[]) {
     p[pSize] = {pSize + 1, name, sId, row, column};
     pSize++;
     printLn("Product added successfully.");
+}
+
+void bubbleSortProducts(Product p[], int size) {
+    for (int i = 0; i < size - 1; ++i) {
+        for (int j = 0; j < size - i - 1; ++j) {
+            if (p[j].name > p[j + 1].name) {
+                Product temp = p[j];
+                p[j] = p[j + 1];
+                p[j + 1] = temp;
+            }
+        }
+    }
 }
 
 void removeProduct(Product p[], int productId) {
@@ -492,7 +538,7 @@ void runProduct(Product p[],Storage s[]){
 	bool isRunning = true;
 	while(isRunning){
 		int userInput;
-		cout << "Select from the menu: \n1]Add Product. \n2]Remove Product. \n3]Review Products. \n4]Search for Product. \n5]Update Product. \n6]Return to main menu." << endl;
+		cout << "Select from the menu: \n1]Add Product. \n2]Remove Product. \n3]Review Products. \n4]Search for Product. \n5]Update Product. \n6]Sort Products by name. \n7]Return to main menu." << endl;
 		cin >> userInput;
 		switch (userInput){
 			case 1: {
@@ -551,6 +597,19 @@ void runProduct(Product p[],Storage s[]){
 				break;
 			}
 			case 6:{
+				Product sortedProducts[LIMIT]; 
+                printDivider();
+                printLn("Review Sorted Products");
+                for (int i = 0; i < pSize; ++i) {
+                    sortedProducts[i] = p[i];
+                }
+                bubbleSortProducts(sortedProducts, pSize);
+                displayProducts(sortedProducts);
+                printDivider();
+                performActionSaveAndLoad("Review sorted products");
+				break;
+			}
+			case 7:{
 				cout << "Return to main menu" << endl;
 				isRunning = false;
 				break;
